@@ -1,3 +1,9 @@
+## Master
+
+### New Features
+
+- Added `createInterpolateElement` function (see [17376](https://github.com/WordPress/gutenberg/pull/17376))
+
 ## 2.4.0 (2019-05-21)
 
 ### New Features
