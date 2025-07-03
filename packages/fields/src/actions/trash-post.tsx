@@ -101,7 +101,7 @@ const trashPost: Action< PostWithPermissions > = {
 								let successMessage;
 								if ( promiseResult.length === 1 ) {
 									successMessage = sprintf(
-										/* translators: The item's title. */
+										/* translators: %s: The item's title. */
 										__( '"%s" moved to the trash.' ),
 										getItemTitle( items[ 0 ] )
 									);

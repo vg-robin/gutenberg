@@ -216,7 +216,7 @@ const resetPostAction: Action< Template | TemplatePart > = {
 								items.length
 						  )
 						: sprintf(
-								/* translators: The template/part's name. */
+								/* translators: %s: The template/part's name. */
 								__( '"%s" reset.' ),
 								getItemTitle( items[ 0 ] )
 						  ),
