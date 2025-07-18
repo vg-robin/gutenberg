@@ -21,6 +21,7 @@
 ### Internal
 
 -   Add new private `DateCalendar` and `DateRangeCalendar` components ([#70578](https://github.com/WordPress/gutenberg/pull/70578), [#70681](https://github.com/WordPress/gutenberg/pull/70681)).
+-   `useControlledValue`: Enhanced hook to support additional arguments in onChange callbacks and improved performance with useCallback optimization ([#70655](https://github.com/WordPress/gutenberg/pull/70655)).
 
 ## 29.12.0 (2025-06-25)
 
