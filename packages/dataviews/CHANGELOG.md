@@ -4,6 +4,7 @@
 
 ### Features
 
+- Introduce a new `array` DataForm Edit control that supports multi-selection. [#71136](https://github.com/WordPress/gutenberg/pull/71136)
 - Add `enableMoving` option to the `table` layout to allow or disallow column moving left and right. [#71120](https://github.com/WordPress/gutenberg/pull/71120)
 
 ### Enhancements
