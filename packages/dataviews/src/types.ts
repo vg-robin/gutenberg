@@ -443,6 +443,11 @@ interface ViewBase {
 	 * The field to group by.
 	 */
 	groupByField?: string;
+
+	/**
+	 * Whether infinite scroll is enabled.
+	 */
+	infiniteScrollEnabled?: boolean;
 }
 
 export interface ColumnStyle {
