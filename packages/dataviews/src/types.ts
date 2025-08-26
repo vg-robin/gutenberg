@@ -756,7 +756,10 @@ export interface DataFormProps< Item > {
 	data: Item;
 	fields: Field< Item >[];
 	form: Form;
-	onChange: ( value: Record< string, any > ) => void;
+	onChange: (
+		value: Record< string, any >,
+		validation: { isValid: boolean }
+	) => void;
 }
 
 export interface FieldLayoutProps< Item > {
