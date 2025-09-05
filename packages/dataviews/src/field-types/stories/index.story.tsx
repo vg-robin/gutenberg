@@ -32,7 +32,6 @@ const meta = {
 			options: [
 				'default',
 				'array',
-				'boolean',
 				'checkbox',
 				'date',
 				'datetime',
@@ -43,6 +42,7 @@ const meta = {
 				'telephone',
 				'url',
 				'text',
+				'toggle',
 				'toggleGroup',
 			],
 		},
@@ -61,6 +61,7 @@ type DataType = {
 	integer: number;
 	integerWithElements: number;
 	boolean: boolean;
+	booleanWithToggle: boolean;
 	booleanWithElements: boolean;
 	datetime: string;
 	datetimeWithElements: string;
@@ -88,6 +89,7 @@ const data: DataType[] = [
 		integer: 1,
 		integerWithElements: 1,
 		boolean: true,
+		booleanWithToggle: true,
 		booleanWithElements: true,
 		datetime: '2021-01-01T14:30:00Z',
 		datetimeWithElements: '2021-01-01T14:30:00Z',
@@ -149,6 +151,13 @@ const fields: Field< DataType >[] = [
 		type: 'boolean',
 		label: 'Boolean',
 		description: 'Help for boolean.',
+	},
+	{
+		id: 'booleanWithToggle',
+		type: 'boolean',
+		label: 'Boolean (with toggle)',
+		description: 'Help for boolean with toggle control.',
+		Edit: 'toggle',
 	},
 	{
 		id: 'booleanWithElements',
@@ -332,7 +341,6 @@ type PanelTypes = 'regular' | 'panel';
 type ControlTypes =
 	| 'default'
 	| 'array'
-	| 'boolean'
 	| 'checkbox'
 	| 'date'
 	| 'datetime'
@@ -343,6 +351,7 @@ type ControlTypes =
 	| 'telephone'
 	| 'url'
 	| 'text'
+	| 'toggle'
 	| 'toggleGroup';
 
 interface FieldTypeStoryProps {
