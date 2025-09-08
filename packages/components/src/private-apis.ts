@@ -19,6 +19,7 @@ import {
 	ValidatedTextControl,
 	ValidatedToggleControl,
 } from './validated-form-controls';
+import { Picker } from './color-picker/picker';
 
 export const privateApis = {};
 lock( privateApis, {
@@ -34,6 +35,7 @@ lock( privateApis, {
 	DateCalendar,
 	DateRangeCalendar,
 	TZDate,
+	Picker,
 	ValidatedInputControl,
 	ValidatedCheckboxControl,
 	ValidatedNumberControl,
