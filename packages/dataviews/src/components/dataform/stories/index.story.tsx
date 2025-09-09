@@ -168,6 +168,12 @@ const fields: Field< SamplePost >[] = [
 		label: 'City',
 		type: 'text',
 	},
+	{
+		id: 'description',
+		label: 'Description',
+		type: 'text',
+		Edit: 'textarea',
+	},
 ];
 
 const LayoutRegularComponent = ( {
@@ -189,6 +195,7 @@ const LayoutRegularComponent = ( {
 		filesize: 1024,
 		dimensions: '1920x1080',
 		tags: [ 'photography' ],
+		description: 'This is a sample description.',
 	} );
 
 	const form: Form = useMemo(
@@ -212,6 +219,7 @@ const LayoutRegularComponent = ( {
 				'filesize',
 				'dimensions',
 				'tags',
+				'description',
 			],
 		} ),
 		[ labelPosition ]
@@ -388,6 +396,7 @@ const ValidationComponent = ( {
 } ) => {
 	type ValidatedItem = {
 		text: string;
+		textarea: string;
 		email: string;
 		telephone: string;
 		url: string;
@@ -400,6 +409,7 @@ const ValidationComponent = ( {
 
 	const [ post, setPost ] = useState< ValidatedItem >( {
 		text: 'Can have letters and spaces',
+		textarea: 'Can have letters and spaces',
 		email: 'hi@example.com',
 		telephone: '+306978241796',
 		url: 'https://example.com',
@@ -412,6 +422,13 @@ const ValidationComponent = ( {
 
 	const customTextRule = ( value: ValidatedItem ) => {
 		if ( ! /^[a-zA-Z ]+$/.test( value.text ) ) {
+			return 'Value must only contain letters and spaces.';
+		}
+
+		return null;
+	};
+	const customTextareaRule = ( value: ValidatedItem ) => {
+		if ( ! /^[a-zA-Z ]+$/.test( value.textarea ) ) {
 			return 'Value must only contain letters and spaces.';
 		}
 
@@ -481,6 +498,16 @@ const ValidationComponent = ( {
 			isValid: {
 				required,
 				custom: maybeCustomRule( customTextRule ),
+			},
+		},
+		{
+			id: 'textarea',
+			type: 'text',
+			Edit: 'textarea',
+			label: 'Textarea',
+			isValid: {
+				required,
+				custom: maybeCustomRule( customTextareaRule ),
 			},
 		},
 		{
@@ -559,6 +586,7 @@ const ValidationComponent = ( {
 		layout: { type },
 		fields: [
 			'text',
+			'textarea',
 			'email',
 			'telephone',
 			'url',

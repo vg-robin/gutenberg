@@ -13,6 +13,7 @@
 - DataForm: introduce a new `row` layout, check the README for details. [#71124](https://github.com/WordPress/gutenberg/pull/71124)
 - Dataform: Add new `url` field type and field control. [#71518](https://github.com/WordPress/gutenberg/pull/71518)
 - Dataform: Add new `password` field type and field control. [#71545](https://github.com/WordPress/gutenberg/pull/71545)
+- DataForm: Add a textarea control for use with the `text` field type ([#71495](https://github.com/WordPress/gutenberg/pull/71495))
 
 ### Bug Fixes
 

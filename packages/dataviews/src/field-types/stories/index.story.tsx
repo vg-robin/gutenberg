@@ -60,6 +60,7 @@ type DataType = {
 	id: number;
 	text: string;
 	textWithElements: string;
+	textWithTextarea: string;
 	integer: number;
 	integerWithElements: number;
 	boolean: boolean;
@@ -92,6 +93,7 @@ const data: DataType[] = [
 		id: 1,
 		text: 'Text',
 		textWithElements: 'Item 1',
+		textWithTextarea: 'Textarea',
 		integer: 1,
 		integerWithElements: 1,
 		boolean: true,
@@ -138,6 +140,13 @@ const fields: Field< DataType >[] = [
 			{ value: 'item2', label: 'Item 2' },
 			{ value: 'item3', label: 'Item 3' },
 		],
+	},
+	{
+		id: 'textWithTextarea',
+		type: 'text',
+		label: 'Textarea',
+		description: 'Help for textarea.',
+		Edit: 'textarea',
 	},
 	{
 		id: 'integer',
