@@ -463,7 +463,13 @@ function ViewGrid< Item >( {
 							'dataviews-no-results': ! isLoading,
 						} ) }
 					>
-						<p>{ isLoading ? <Spinner /> : empty }</p>
+						{ isLoading ? (
+							<p>
+								<Spinner />
+							</p>
+						) : (
+							empty
+						) }
 					</div>
 				)
 			}
