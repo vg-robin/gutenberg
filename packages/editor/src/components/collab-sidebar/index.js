@@ -336,6 +336,11 @@ export default function CollabSidebar() {
 		? AddCommentToolbarButton
 		: AddCommentButton;
 
+	// If postId is not a valid number, do not render the comment sidebar.
+	if ( ! ( !! postId && typeof postId === 'number' ) ) {
+		return null;
+	}
+
 	return (
 		<>
 			<AddCommentComponent onClick={ openCollabBoard } />
