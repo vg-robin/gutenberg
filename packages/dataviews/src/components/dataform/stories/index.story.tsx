@@ -41,6 +41,7 @@ type SamplePost = {
 	address1?: string;
 	address2?: string;
 	city?: string;
+	longDescription?: string;
 };
 
 const fields: Field< SamplePost >[] = [
@@ -174,6 +175,15 @@ const fields: Field< SamplePost >[] = [
 		type: 'text',
 		Edit: 'textarea',
 	},
+	{
+		id: 'longDescription',
+		label: 'Long Description',
+		type: 'text',
+		Edit: {
+			control: 'textarea',
+			rows: 5,
+		},
+	},
 ];
 
 const LayoutRegularComponent = ( {
@@ -220,6 +230,7 @@ const LayoutRegularComponent = ( {
 				'dimensions',
 				'tags',
 				'description',
+				'longDescription',
 			],
 		} ),
 		[ labelPosition ]
