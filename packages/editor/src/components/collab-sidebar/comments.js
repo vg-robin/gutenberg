@@ -116,6 +116,7 @@ export function Comments( {
 							onEditComment={ onEditComment }
 							isFocused={ focusThread === thread.id }
 							clearThreadFocus={ clearThreadFocus }
+							setFocusThread={ setFocusThread }
 						/>
 					</VStack>
 				) ) }
@@ -132,6 +133,7 @@ function Thread( {
 	onCommentReopen,
 	isFocused,
 	clearThreadFocus,
+	setFocusThread,
 } ) {
 	return (
 		<>
@@ -146,13 +148,18 @@ function Thread( {
 			{ 0 < thread?.reply?.length && (
 				<>
 					{ ! isFocused && (
-						<VStack className="editor-collab-sidebar-panel__show-more-reply">
+						<Button
+							__next40pxDefaultSize
+							variant="link"
+							className="editor-collab-sidebar-panel__show-more-reply"
+							onClick={ () => setFocusThread( thread.id ) }
+						>
 							{ sprintf(
 								// translators: %s: number of replies.
 								_x( '%s more replies', 'Show replies button' ),
 								thread?.reply?.length
 							) }
-						</VStack>
+						</Button>
 					) }
 
 					{ isFocused &&
