@@ -257,7 +257,8 @@ export default function CollabSidebar() {
 	const { records: threads, totalPages } = useEntityRecords(
 		'root',
 		'comment',
-		queryArgs
+		queryArgs,
+		{ enabled: !! postId && typeof postId === 'number' }
 	);
 
 	const hasMoreComments = totalPages && totalPages > 1;
