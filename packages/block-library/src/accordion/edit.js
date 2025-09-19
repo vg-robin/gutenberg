@@ -56,10 +56,7 @@ export default function Edit( {
 		<>
 			{ isSingleSelected && (
 				<BlockControls group="other">
-					<ToolbarButton
-						label={ __( 'Add accordion content block' ) }
-						onClick={ addAccordionContentBlock }
-					>
+					<ToolbarButton onClick={ addAccordionContentBlock }>
 						{ __( 'Add' ) }
 					</ToolbarButton>
 				</BlockControls>
