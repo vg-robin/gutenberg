@@ -6,6 +6,10 @@
 
 - DataViews: keep non-hideable fields out of the hidden-fields list when they’re already invisible. [#71729](https://github.com/WordPress/gutenberg/pull/71729/)
 
+### Enhancements
+
+- DataViews: Require at least one field to be visible. ([#71625](https://github.com/WordPress/gutenberg/pull/71625))
+
 ## 9.0.0 (2025-09-17)
 
 ### Breaking changes
