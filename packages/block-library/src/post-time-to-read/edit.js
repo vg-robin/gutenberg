@@ -29,13 +29,8 @@ import { count as wordCount } from '@wordpress/wordcount';
 import { useToolsPanelDropdownMenuProps } from '../utils/hooks';
 
 function PostTimeToReadEdit( { attributes, setAttributes, context } ) {
-	const {
-		textAlign,
-		displayAsRange,
-		showTimeToRead,
-		showWordCount,
-		averageReadingSpeed,
-	} = attributes;
+	const { textAlign, displayAsRange, displayMode, averageReadingSpeed } =
+		attributes;
 
 	const { postId, postType } = context;
 	const dropdownMenuProps = useToolsPanelDropdownMenuProps();
@@ -80,7 +75,7 @@ function PostTimeToReadEdit( { attributes, setAttributes, context } ) {
 		const parts = [];
 
 		// Add "time to read" part, if enabled.
-		if ( showTimeToRead ) {
+		if ( displayMode === 'time' ) {
 			let timeString;
 			if ( displayAsRange ) {
 				let maxMinutes = Math.max(
@@ -117,7 +112,7 @@ function PostTimeToReadEdit( { attributes, setAttributes, context } ) {
 		}
 
 		// Add "word count" part, if enabled.
-		if ( showWordCount ) {
+		if ( displayMode === 'words' ) {
 			const wordCountString =
 				wordCountType === 'words'
 					? sprintf(
@@ -146,8 +141,7 @@ function PostTimeToReadEdit( { attributes, setAttributes, context } ) {
 		contentStructure,
 		blocks,
 		displayAsRange,
-		showTimeToRead,
-		showWordCount,
+		displayMode,
 		averageReadingSpeed,
 	] );
 
@@ -167,39 +161,17 @@ function PostTimeToReadEdit( { attributes, setAttributes, context } ) {
 					} }
 				/>
 			</BlockControls>
-			<InspectorControls>
-				<ToolsPanel
-					label={ __( 'Settings' ) }
-					resetAll={ () => {
-						setAttributes( {
-							displayAsRange: true,
-							showTimeToRead: true,
-							showWordCount: false,
-						} );
-					} }
-					dropdownMenuProps={ dropdownMenuProps }
-				>
-					<ToolsPanelItem
-						label={ __( 'Show time to read' ) }
-						hasValue={ () => ! showTimeToRead }
-						onDeselect={ () => {
+			{ displayMode === 'time' && (
+				<InspectorControls>
+					<ToolsPanel
+						label={ __( 'Settings' ) }
+						resetAll={ () => {
 							setAttributes( {
-								showTimeToRead: true,
+								displayAsRange: true,
 							} );
 						} }
+						dropdownMenuProps={ dropdownMenuProps }
 					>
-						<ToggleControl
-							__nextHasNoMarginBottom
-							label={ __( 'Show time to read' ) }
-							checked={ !! showTimeToRead }
-							onChange={ () =>
-								setAttributes( {
-									showTimeToRead: ! showTimeToRead,
-								} )
-							}
-						/>
-					</ToolsPanelItem>
-					{ showTimeToRead && (
 						<ToolsPanelItem
 							isShownByDefault
 							label={ _x(
@@ -224,29 +196,9 @@ function PostTimeToReadEdit( { attributes, setAttributes, context } ) {
 								}
 							/>
 						</ToolsPanelItem>
-					) }
-					<ToolsPanelItem
-						label={ __( 'Show word count' ) }
-						hasValue={ () => !! showWordCount }
-						onDeselect={ () => {
-							setAttributes( {
-								showWordCount: false,
-							} );
-						} }
-					>
-						<ToggleControl
-							__nextHasNoMarginBottom
-							label={ __( 'Show word count' ) }
-							checked={ !! showWordCount }
-							onChange={ () =>
-								setAttributes( {
-									showWordCount: ! showWordCount,
-								} )
-							}
-						/>
-					</ToolsPanelItem>
-				</ToolsPanel>
-			</InspectorControls>
+					</ToolsPanel>
+				</InspectorControls>
+			) }
 			<div { ...blockProps }>{ displayString }</div>
 		</>
 	);
