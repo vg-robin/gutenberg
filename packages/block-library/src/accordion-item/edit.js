@@ -80,7 +80,7 @@ export default function Edit( {
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
 		template: [
 			[
-				'core/accordion-header',
+				'core/accordion-heading',
 				headingLevel ? { level: headingLevel } : {},
 			],
 			[

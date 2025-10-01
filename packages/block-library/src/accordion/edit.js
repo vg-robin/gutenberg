@@ -28,8 +28,8 @@ import { createBlock } from '@wordpress/blocks';
  */
 import { useToolsPanelDropdownMenuProps } from '../utils/hooks';
 
-const ACCORDION_BLOCK_NAME = 'core/accordion-content';
-const ACCORDION_HEADER_BLOCK_NAME = 'core/accordion-header';
+const ACCORDION_BLOCK_NAME = 'core/accordion-item';
+const ACCORDION_HEADING_BLOCK_NAME = 'core/accordion-heading';
 const ACCORDION_BLOCK = {
 	name: ACCORDION_BLOCK_NAME,
 };
@@ -62,13 +62,15 @@ export default function Edit( {
 		templateInsertUpdatesSelection: true,
 	} );
 
-	const addAccordionContentBlock = () => {
+	const addAccordionItemBlock = () => {
 		// When adding, set the header's level to current headingLevel
-		const newAccordionContent = createBlock( ACCORDION_BLOCK_NAME, {}, [
-			createBlock( ACCORDION_HEADER_BLOCK_NAME, { level: headingLevel } ),
+		const newAccordionItem = createBlock( ACCORDION_BLOCK_NAME, {}, [
+			createBlock( ACCORDION_HEADING_BLOCK_NAME, {
+				level: headingLevel,
+			} ),
 			createBlock( 'core/accordion-panel', {} ),
 		] );
-		insertBlock( newAccordionContent, undefined, clientId );
+		insertBlock( newAccordionItem, undefined, clientId );
 	};
 
 	/**
@@ -109,7 +111,7 @@ export default function Edit( {
 						</ToolbarGroup>
 					</BlockControls>
 					<BlockControls group="other">
-						<ToolbarButton onClick={ addAccordionContentBlock }>
+						<ToolbarButton onClick={ addAccordionItemBlock }>
 							{ __( 'Add' ) }
 						</ToolbarButton>
 					</BlockControls>
