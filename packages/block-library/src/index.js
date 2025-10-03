@@ -10,8 +10,9 @@ import {
 	store as blocksStore,
 } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
-import { createElement } from '@wordpress/element';
-import ServerSideRender from '@wordpress/server-side-render';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useServerSideRender } from '@wordpress/server-side-render';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -326,11 +327,39 @@ export const registerCoreBlocks = (
 			registerBlockType( blockName, {
 				title: blockName,
 				...( bootstrappedApiVersion < 3 && { apiVersion: 3 } ),
-				edit: ( { attributes } ) => {
-					return createElement( ServerSideRender, {
+				edit: function Edit( { attributes } ) {
+					const blockProps = useBlockProps();
+					const { content, status, error } = useServerSideRender( {
 						block: blockName,
 						attributes,
 					} );
+
+					if ( status === 'loading' ) {
+						return (
+							<div { ...blockProps }>{ __( 'Loading…' ) }</div>
+						);
+					}
+
+					if ( status === 'error' ) {
+						return (
+							<div { ...blockProps }>
+								{ sprintf(
+									/* translators: %s: error message describing the problem */
+									__( 'Error loading block: %s' ),
+									error
+								) }
+							</div>
+						);
+					}
+
+					return (
+						<div
+							{ ...blockProps }
+							dangerouslySetInnerHTML={ {
+								__html: content || '',
+							} }
+						/>
+					);
 				},
 				save: () => null,
 			} );
