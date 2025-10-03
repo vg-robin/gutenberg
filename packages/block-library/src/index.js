@@ -7,7 +7,9 @@ import {
 	setUnregisteredTypeHandlerName,
 	setGroupingBlockName,
 	registerBlockType,
+	store as blocksStore,
 } from '@wordpress/blocks';
+import { select } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
 import ServerSideRender from '@wordpress/server-side-render';
 
@@ -133,6 +135,7 @@ import * as video from './video';
 import * as footnotes from './footnotes';
 
 import isBlockMetadataExperimental from './utils/is-block-metadata-experimental';
+import { unlock } from './lock-unlock';
 
 /**
  * Function to get all the block-library blocks in an array
@@ -315,8 +318,14 @@ export const registerCoreBlocks = (
 	// Auto-register PHP-only blocks with ServerSideRender
 	if ( window.__unstableAutoRegisterBlocks ) {
 		window.__unstableAutoRegisterBlocks.forEach( ( blockName ) => {
+			const bootstrappedBlockType = unlock(
+				select( blocksStore )
+			).getBootstrappedBlockType( blockName );
+			const bootstrappedApiVersion = bootstrappedBlockType.apiVersion;
+
 			registerBlockType( blockName, {
 				title: blockName,
+				...( bootstrappedApiVersion < 3 && { apiVersion: 3 } ),
 				edit: ( { attributes } ) => {
 					return createElement( ServerSideRender, {
 						block: blockName,
