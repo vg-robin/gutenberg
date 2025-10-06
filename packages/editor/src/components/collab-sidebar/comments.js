@@ -6,7 +6,7 @@ import clsx from 'clsx';
 /**
  * WordPress dependencies
  */
-import { useState, RawHTML, useRef } from '@wordpress/element';
+import { useState, RawHTML, useRef, useEffect } from '@wordpress/element';
 import {
 	__experimentalText as Text,
 	__experimentalHStack as HStack,
@@ -56,6 +56,8 @@ export function Comments( {
 	onCommentDelete,
 	setShowCommentBoard,
 } ) {
+	const [ selectedThread, setSelectedThread ] = useState();
+
 	const blockCommentId = useSelect( ( select ) => {
 		const { getBlockAttributes, getSelectedBlockClientId } =
 			select( blockEditorStore );
@@ -64,7 +66,11 @@ export function Comments( {
 			? getBlockAttributes( clientId )?.metadata?.commentId
 			: null;
 	}, [] );
-	const [ selectedThread = blockCommentId, setSelectedThread ] = useState();
+
+	// Auto-select the related comment thread when a block is selected.
+	useEffect( () => {
+		setSelectedThread( blockCommentId ?? undefined );
+	}, [ blockCommentId ] );
 
 	const hasThreads = Array.isArray( threads ) && threads.length > 0;
 	if ( ! hasThreads ) {
@@ -107,7 +113,8 @@ function Thread( {
 	setShowCommentBoard,
 } ) {
 	const threadRef = useRef( null );
-	const { toggleBlockHighlight } = useDispatch( blockEditorStore );
+	const { toggleBlockHighlight, selectBlock } =
+		useDispatch( blockEditorStore );
 	const relatedBlockElement = useBlockElement( thread.blockClientId );
 	const debouncedToggleBlockHighlight = useDebounce(
 		toggleBlockHighlight,
@@ -122,15 +129,11 @@ function Thread( {
 		debouncedToggleBlockHighlight( thread.blockClientId, false );
 	};
 
-	const handleCommentSelect = ( { id, blockClientId } ) => {
+	const handleCommentSelect = () => {
 		setShowCommentBoard( false );
-		setSelectedThread( id );
-		if ( blockClientId && relatedBlockElement ) {
-			relatedBlockElement.scrollIntoView( {
-				behavior: 'instant',
-				block: 'center',
-			} );
-		}
+		setSelectedThread( thread.id );
+		// pass `null` as the second parameter to prevent focusing the block.
+		selectBlock( thread.blockClientId, null );
 	};
 
 	const focusThread = () => {
@@ -173,7 +176,7 @@ function Thread( {
 			} ) }
 			id={ `thread-${ thread.id }` }
 			spacing="2"
-			onClick={ () => handleCommentSelect( thread ) }
+			onClick={ handleCommentSelect }
 			onMouseEnter={ onMouseEnter }
 			onMouseLeave={ onMouseLeave }
 			onFocus={ onMouseEnter }
@@ -187,7 +190,7 @@ function Thread( {
 					if ( isSelected ) {
 						unselectThread();
 					} else {
-						handleCommentSelect( thread );
+						handleCommentSelect();
 					}
 				}
 				// Collapse thread and focus the thread.
