@@ -6,6 +6,7 @@
 
 - Dataviews: Make header table view select all checkbox always visible. ([#72050](https://github.com/WordPress/gutenberg/pull/72050))
 - Move search icon in search fields to prefix position ([#71984](https://github.com/WordPress/gutenberg/pull/71984)).
+- Flip search icons depending on placement ([#72070](https://github.com/WordPress/gutenberg/pull/72070)).
 - DataViews: Improve renderItemLink event propagation handling. ([#72081](https://github.com/WordPress/gutenberg/pull/72081)).
 
 ### Breaking changes
