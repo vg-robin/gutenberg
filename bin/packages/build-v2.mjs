@@ -17,6 +17,7 @@ import { sassPlugin } from 'esbuild-sass-plugin';
 import postcss from 'postcss';
 import autoprefixer from 'autoprefixer';
 import rtlcss from 'rtlcss';
+import cssnano from 'cssnano';
 
 /**
  * Internal dependencies
@@ -410,6 +411,48 @@ function wordpressExternalsPlugin(
 }
 
 /**
+ * Resolve the entry point for bundling from package.json exports field.
+ * Falls back to build-module/index.js if no exports field is found.
+ *
+ * @param {string} packageDir  Package directory path.
+ * @param {Object} packageJson Package.json object.
+ * @return {string} Resolved entry point path.
+ */
+function resolveEntryPoint( packageDir, packageJson ) {
+	// If package has exports field, use it
+	if ( packageJson.exports ) {
+		const rootExport = packageJson.exports[ '.' ];
+		if ( rootExport ) {
+			// If it's an object with conditions, prefer 'import' over 'default'
+			if ( typeof rootExport === 'object' ) {
+				const entryFile =
+					rootExport.import ||
+					rootExport.default ||
+					rootExport.require;
+				if ( entryFile ) {
+					return path.join( packageDir, entryFile );
+				}
+			}
+			// If it's a string, use it directly
+			if ( typeof rootExport === 'string' ) {
+				return path.join( packageDir, rootExport );
+			}
+		}
+	}
+
+	// Fallback: try module field, then main field, then build-module/index.js
+	if ( packageJson.module ) {
+		return path.join( packageDir, packageJson.module );
+	}
+	if ( packageJson.main ) {
+		return path.join( packageDir, packageJson.main );
+	}
+
+	// Ultimate fallback
+	return path.join( packageDir, 'build-module', 'index.js' );
+}
+
+/**
  * Bundle a package for WordPress using esbuild.
  *
  * @param {string} packageName Package name.
@@ -424,7 +467,7 @@ async function bundlePackage( packageName ) {
 
 	// Bundle wpScript (IIFE format for global wp.* namespace)
 	if ( packageJson.wpScript ) {
-		const entryPoint = path.join( packageDir, 'build-module', 'index.js' );
+		const entryPoint = resolveEntryPoint( packageDir, packageJson );
 		const outputDir = path.join( PACKAGES_DIR, '..', 'build', packageName );
 		const target = browserslistToEsbuild();
 		const globalName = `wp.${ kebabToCamelCase( packageName ) }`;
@@ -517,10 +560,11 @@ async function bundlePackage( packageName ) {
 		}
 	}
 
-	// Copy CSS files from build-style to build directory (for wpScript packages)
+	// Process CSS files from build-style to build directory (for wpScript packages)
 	if ( packageJson.wpScript ) {
 		const buildStyleDir = path.join( packageDir, 'build-style' );
 		const outputDir = path.join( PACKAGES_DIR, '..', 'build', packageName );
+		const isProduction = process.env.NODE_ENV === 'production';
 
 		try {
 			// Find CSS files in build-style directory
@@ -532,11 +576,41 @@ async function bundlePackage( packageName ) {
 				// Ensure output directory exists
 				await mkdir( outputDir, { recursive: true } );
 
-				// Copy each CSS file
+				// Process each CSS file
 				for ( const cssFile of cssFiles ) {
 					const filename = path.basename( cssFile );
 					const destPath = path.join( outputDir, filename );
-					builds.push( copyFile( cssFile, destPath ) );
+
+					if ( isProduction ) {
+						// In production, minify CSS with cssnano
+						builds.push(
+							( async () => {
+								const cssContent = await readFile(
+									cssFile,
+									'utf8'
+								);
+								const result = await postcss( [
+									cssnano( {
+										preset: [
+											'default',
+											{
+												discardComments: {
+													removeAll: true,
+												},
+											},
+										],
+									} ),
+								] ).process( cssContent, {
+									from: cssFile,
+									to: destPath,
+								} );
+								await writeFile( destPath, result.css );
+							} )()
+						);
+					} else {
+						// In development, just copy the file
+						builds.push( copyFile( cssFile, destPath ) );
+					}
 				}
 			}
 		} catch ( error ) {
@@ -860,7 +934,25 @@ async function watchMode() {
 
 	watch(
 		PACKAGES_DIR,
-		{ recursive: true, delay: 500 },
+		{
+			recursive: true,
+			delay: 500,
+			filter( filename ) {
+				// Exclude build output directories and dependencies to reduce file descriptor usage
+				const basename = path.basename( filename );
+				if (
+					basename === 'node_modules' ||
+					basename === 'build' ||
+					basename === 'build-module' ||
+					basename === 'build-style' ||
+					basename === 'build-types' ||
+					basename === '.git'
+				) {
+					return false;
+				}
+				return true;
+			},
+		},
 		( event, filename ) => {
 			if ( ! isV2SourceFile( filename ) ) {
 				return;
