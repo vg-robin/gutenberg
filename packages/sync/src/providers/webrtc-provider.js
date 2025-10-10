@@ -8,10 +8,10 @@
  */
 import { WebrtcProviderWithHttpSignaling } from './webrtc-http-stream-signaling';
 
-/** @typedef {import('./types').ObjectType} ObjectType */
-/** @typedef {import('./types').ObjectID} ObjectID */
-/** @typedef {import('./types').CRDTDoc} CRDTDoc */
-/** @typedef {import('./types').ProviderCreator} ProviderCreator */
+/** @typedef {import('../types').ObjectType} ObjectType */
+/** @typedef {import('../types').ObjectID} ObjectID */
+/** @typedef {import('../types').CRDTDoc} CRDTDoc */
+/** @typedef {import('../types').ProviderCreator} ProviderCreator */
 
 /**
  * Function that creates a new WebRTC Connection.
@@ -21,7 +21,7 @@ import { WebrtcProviderWithHttpSignaling } from './webrtc-http-stream-signaling'
  * @param {string|undefined} config.password
  * @return {ProviderCreator} Promise that resolves when the connection is established.
  */
-export function createWebRTCConnection( { signaling, password } ) {
+export function createWebRTCProvider( { signaling, password } ) {
 	return function (
 		/** @type {ObjectType} */ objectType,
 		/** @type {ObjectID} */ objectId,
