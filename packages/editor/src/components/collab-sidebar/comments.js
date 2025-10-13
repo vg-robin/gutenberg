@@ -116,19 +116,26 @@ export function Comments( {
 		);
 	}
 
-	return threads.map( ( thread ) => (
-		<Thread
-			key={ thread.id }
-			thread={ thread }
-			onAddReply={ onAddReply }
-			onCommentDelete={ handleDelete }
-			onEditComment={ onEditComment }
-			isSelected={ selectedThread === thread.id }
-			setSelectedThread={ setSelectedThread }
-			setShowCommentBoard={ setShowCommentBoard }
-			commentSidebarRef={ commentSidebarRef }
-		/>
-	) );
+	return (
+		<VStack spacing="3">
+			<Text as="p" variant="muted">
+				{ __( 'Only logged in users can see Notes' ) }
+			</Text>
+			{ threads.map( ( thread ) => (
+				<Thread
+					key={ thread.id }
+					thread={ thread }
+					onAddReply={ onAddReply }
+					onCommentDelete={ handleDelete }
+					onEditComment={ onEditComment }
+					isSelected={ selectedThread === thread.id }
+					setSelectedThread={ setSelectedThread }
+					setShowCommentBoard={ setShowCommentBoard }
+					commentSidebarRef={ commentSidebarRef }
+				/>
+			) ) }
+		</VStack>
+	);
 }
 
 function Thread( {
