@@ -15,8 +15,8 @@ import {
 	useEffect,
 	useMemo,
 	useRef,
-	useState,
 	useCallback,
+	useReducer,
 } from '@wordpress/element';
 import { useEntityRecords, store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
@@ -34,15 +34,15 @@ import { store as interfaceStore } from '@wordpress/interface';
 import { store as editorStore } from '../../store';
 import { collabSidebarName } from './constants';
 import { unlock } from '../../lock-unlock';
+import { noop } from './utils';
 
 const { useBlockElementRef } = unlock( blockEditorPrivateApis );
 
 export function useBlockComments( postId ) {
-	const [ commentLastUpdated, setCommentLastUpdated ] = useState( null );
-
-	const reflowComments = () => {
-		setCommentLastUpdated( Date.now() );
-	};
+	const [ commentLastUpdated, reflowComments ] = useReducer(
+		() => Date.now(),
+		0
+	);
 
 	const queryArgs = {
 		post: postId,
@@ -155,7 +155,7 @@ export function useBlockComments( postId ) {
 	};
 }
 
-export function useBlockCommentsActions( reflowComments ) {
+export function useBlockCommentsActions( reflowComments = noop ) {
 	const { createNotice } = useDispatch( noticesStore );
 	const { saveEntityRecord, deleteEntityRecord } = useDispatch( coreStore );
 	const { getCurrentPostId } = useSelect( editorStore );
