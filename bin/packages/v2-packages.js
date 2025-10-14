@@ -7,6 +7,7 @@
  */
 const V2_PACKAGES = [
 	'a11y',
+	'admin-ui',
 	'annotations',
 	'api-fetch',
 	'autop',
@@ -29,6 +30,7 @@ const V2_PACKAGES = [
 	'data',
 	'data-controls',
 	'date',
+	'dataviews',
 	'dependency-extraction-webpack-plugin',
 	'deprecated',
 	'docgen',
@@ -40,12 +42,14 @@ const V2_PACKAGES = [
 	'env',
 	'escape-html',
 	'eslint-plugin',
+	'format-library',
 	'hooks',
 	'html-entities',
 	'i18n',
 	'icons',
 	'interactivity',
 	'interactivity-router',
+	'interface',
 	'is-shallow-equal',
 	'jest-console',
 	'jest-preset-default',
@@ -86,6 +90,7 @@ const V2_PACKAGES = [
 	'upload-media',
 	'url',
 	'viewport',
+	'views',
 	'warning',
 	'wordcount',
 ];
