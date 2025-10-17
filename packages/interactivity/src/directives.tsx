@@ -35,6 +35,7 @@ import {
 } from './hooks';
 import { getScope } from './scopes';
 import { proxifyState, proxifyContext, deepMerge } from './proxies';
+import { PENDING_GETTER } from './proxies/state';
 
 const warnUniqueIdWithTwoHyphens = (
 	prefix: string,
@@ -559,6 +560,9 @@ export default () => {
 						? `${ entry.suffix }---${ entry.uniqueId }`
 						: entry.suffix;
 					let result = evaluate( entry );
+					if ( result === PENDING_GETTER ) {
+						return;
+					}
 					if ( typeof result === 'function' ) {
 						result = result();
 					}
@@ -608,6 +612,9 @@ export default () => {
 			}
 			const styleProp = entry.suffix;
 			let result = evaluate( entry );
+			if ( result === PENDING_GETTER ) {
+				return;
+			}
 			if ( typeof result === 'function' ) {
 				result = result();
 			}
@@ -651,6 +658,9 @@ export default () => {
 			}
 			const attribute = entry.suffix;
 			let result = evaluate( entry );
+			if ( result === PENDING_GETTER ) {
+				return;
+			}
 			if ( typeof result === 'function' ) {
 				result = result();
 			}
@@ -772,6 +782,9 @@ export default () => {
 			}
 			try {
 				let result = evaluate( entry );
+				if ( result === PENDING_GETTER ) {
+					return;
+				}
 				if ( typeof result === 'function' ) {
 					result = result();
 				}
@@ -840,6 +853,9 @@ export default () => {
 			}
 
 			let iterable = evaluate( entry );
+			if ( iterable === PENDING_GETTER ) {
+				return;
+			}
 			if ( typeof iterable === 'function' ) {
 				iterable = iterable();
 			}
@@ -891,7 +907,20 @@ export default () => {
 	);
 
 	// data-wp-each-child (internal use only)
-	directive( 'each-child', () => null, { priority: 1 } );
+	directive(
+		'each-child',
+		( { directives: { 'each-child': eachChild }, element, evaluate } ) => {
+			const entry = eachChild.find( isDefaultDirectiveSuffix );
+
+			if ( ! entry ) {
+				return;
+			}
+
+			const iterable = evaluate( entry );
+			return iterable === PENDING_GETTER ? element : null;
+		},
+		{ priority: 1 }
+	);
 
 	// data-wp-router-region
 	directive(
