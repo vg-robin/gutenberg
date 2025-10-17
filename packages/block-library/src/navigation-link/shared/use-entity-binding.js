@@ -5,6 +5,46 @@ import { useCallback } from '@wordpress/element';
 import { useBlockBindingsUtils } from '@wordpress/block-editor';
 
 /**
+ * Builds entity binding configuration for navigation link URLs.
+ * This function generates the structure used to bind navigation link URLs to their entity sources.
+ *
+ * Using a function instead of a constant allows for future enhancements where the binding
+ * might need dynamic data (e.g., entity ID, context-specific arguments).
+ *
+ * @param {('post-type'|'taxonomy')} kind - The kind of entity. Only 'post-type' and 'taxonomy' are supported.
+ * @return {Object} Entity binding configuration object
+ * @throws {Error} If kind is not 'post-type' or 'taxonomy'
+ */
+export function buildNavigationLinkEntityBinding( kind ) {
+	// Validate kind parameter exists
+	if ( kind === undefined ) {
+		throw new Error(
+			'buildNavigationLinkEntityBinding requires a kind parameter. ' +
+				'Only "post-type" and "taxonomy" are supported.'
+		);
+	}
+
+	// Validate kind parameter value
+	if ( kind !== 'post-type' && kind !== 'taxonomy' ) {
+		throw new Error(
+			`Invalid kind "${ kind }" provided to buildNavigationLinkEntityBinding. ` +
+				`Only 'post-type' and 'taxonomy' are supported.`
+		);
+	}
+
+	const source = kind === 'taxonomy' ? 'core/term-data' : 'core/post-data';
+
+	return {
+		url: {
+			source,
+			args: {
+				key: 'link',
+			},
+		},
+	};
+}
+
+/**
  * Shared hook for entity binding functionality in Navigation blocks.
  *
  * This hook provides common entity binding logic that can be used by both
@@ -42,19 +82,17 @@ export function useEntityBinding( { clientId, attributes } ) {
 				return;
 			}
 
-			// Default to post-type in case there is a need to support dynamic kinds
-			// in the future.
-			const source =
-				kindToUse === 'taxonomy' ? 'core/term-data' : 'core/post-data';
-
-			updateBlockBindings( {
-				url: {
-					source,
-					args: {
-						key: 'link',
-					},
-				},
-			} );
+			try {
+				const binding = buildNavigationLinkEntityBinding( kindToUse );
+				updateBlockBindings( binding );
+			} catch ( error ) {
+				// eslint-disable-next-line no-console
+				console.warn(
+					'Failed to create entity binding:',
+					error.message
+				);
+				// Don't create binding if validation fails
+			}
 		},
 		[ updateBlockBindings, kind, id ]
 	);
