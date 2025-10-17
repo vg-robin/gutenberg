@@ -12,7 +12,54 @@ const NAVIGATION_BLOCK_TYPES = [
 ];
 
 /**
- * Gets a list of post data fields with their values and labels
+ * Creates the data fields object with the given term data values and ID value.
+ *
+ * @param {Object}        termDataValues The term data values.
+ * @param {string|number} idValue        The ID value to use.
+ * @return {Object} The data fields object.
+ */
+function createDataFields( termDataValues, idValue ) {
+	return {
+		id: {
+			label: __( 'Term ID' ),
+			value: idValue,
+			type: 'string',
+		},
+		name: {
+			label: __( 'Name' ),
+			value: termDataValues?.name,
+			type: 'string',
+		},
+		slug: {
+			label: __( 'Slug' ),
+			value: termDataValues?.slug,
+			type: 'string',
+		},
+		link: {
+			label: __( 'Link' ),
+			value: termDataValues?.link,
+			type: 'string',
+		},
+		description: {
+			label: __( 'Description' ),
+			value: termDataValues?.description,
+			type: 'string',
+		},
+		parent: {
+			label: __( 'Parent ID' ),
+			value: termDataValues?.parent,
+			type: 'string',
+		},
+		count: {
+			label: __( 'Count' ),
+			value: `(${ termDataValues?.count ?? 0 })`,
+			type: 'string',
+		},
+	};
+}
+
+/**
+ * Gets a list of term data fields with their values and labels
  * to be consumed in the needed callbacks.
  * If the value is not available based on context, like in templates,
  * it falls back to the default value, label, or key.
@@ -20,28 +67,28 @@ const NAVIGATION_BLOCK_TYPES = [
  * @param {Object} select   The select function from the data store.
  * @param {Object} context  The context provided.
  * @param {string} clientId The block client ID used to read attributes.
- * @return {Object} List of post data fields with their value and label.
+ * @return {Object} List of term data fields with their value and label.
  *
  * @example
  * ```js
  * {
- *     field_1_key: {
- *         label: 'Field 1 Label',
- *         value: 'Field 1 Value',
+ *     name: {
+ *         label: 'Term Name',
+ *         value: 'Category Name',
  *     },
- *     field_2_key: {
- *         label: 'Field 2 Label',
- *         value: 'Field 2 Value',
+ *     count: {
+ *         label: 'Term Count',
+ *         value: 5,
  *     },
  *     ...
  * }
  * ```
  */
-function getPostDataFields( select, context, clientId ) {
-	const { getEditedEntityRecord } = select( coreDataStore );
+function getTermDataFields( select, context, clientId ) {
+	const { getEntityRecord } = select( coreDataStore );
 	const { getBlockAttributes, getBlockName } = select( blockEditorStore );
 
-	let entityDataValues, dataFields;
+	let termDataValues, dataFields;
 
 	/*
 	 * BACKWARDS COMPATIBILITY: Hardcoded exception for navigation blocks.
@@ -50,46 +97,40 @@ function getPostDataFields( select, context, clientId ) {
 	const blockName = getBlockName?.( clientId );
 	const isNavigationBlock = NAVIGATION_BLOCK_TYPES.includes( blockName );
 
-	let postId, postType;
+	let termId, taxonomy;
 
 	if ( isNavigationBlock ) {
 		// Navigation blocks: read from block attributes
 		const blockAttributes = getBlockAttributes?.( clientId );
-		postId = blockAttributes?.id;
-		postType = blockAttributes?.type;
+		termId = blockAttributes?.id;
+		const typeFromAttributes = blockAttributes?.type;
+		taxonomy =
+			typeFromAttributes === 'tag' ? 'post_tag' : typeFromAttributes;
 	} else {
 		// All other blocks: use context
-		postId = context?.postId;
-		postType = context?.postType;
+		termId = context?.termId;
+		taxonomy = context?.taxonomy;
 	}
 
-	// Try to get the current entity data values using resolved identifiers.
-	if ( postType && postId ) {
-		entityDataValues = getEditedEntityRecord(
-			'postType',
-			postType,
-			postId
+	if ( taxonomy && termId ) {
+		termDataValues = getEntityRecord( 'taxonomy', taxonomy, termId );
+
+		if ( ! termDataValues && context?.termData ) {
+			termDataValues = context.termData;
+		}
+
+		if ( termDataValues ) {
+			dataFields = createDataFields( termDataValues, termId );
+		}
+	} else if ( context?.termData ) {
+		termDataValues = context.termData;
+		dataFields = createDataFields(
+			termDataValues,
+			termDataValues?.term_id
 		);
-		dataFields = {
-			date: {
-				label: __( 'Post Date' ),
-				value: entityDataValues?.date,
-				type: 'string',
-			},
-			modified: {
-				label: __( 'Post Modified Date' ),
-				value: entityDataValues?.modified,
-				type: 'string',
-			},
-			link: {
-				label: __( 'Post Link' ),
-				value: entityDataValues?.link,
-				type: 'string',
-			},
-		};
 	}
 
-	if ( ! Object.keys( dataFields || {} ).length ) {
+	if ( ! dataFields || ! Object.keys( dataFields ).length ) {
 		return null;
 	}
 
@@ -100,9 +141,10 @@ function getPostDataFields( select, context, clientId ) {
  * @type {WPBlockBindingsSource}
  */
 export default {
-	name: 'core/post-data',
+	name: 'core/term-data',
+	usesContext: [ 'taxonomy', 'termId', 'termData' ],
 	getValues( { select, context, bindings, clientId } ) {
-		const dataFields = getPostDataFields( select, context, clientId );
+		const dataFields = getTermDataFields( select, context, clientId );
 
 		const newValues = {};
 		for ( const [ attributeName, source ] of Object.entries( bindings ) ) {
@@ -114,31 +156,15 @@ export default {
 		}
 		return newValues;
 	},
-	setValues( { dispatch, context, bindings, clientId, select } ) {
-		const { getBlockName } = select( blockEditorStore );
-
-		const blockName = getBlockName?.( clientId );
-
-		// Navigaton block types are read-only.
-		// See https://github.com/WordPress/gutenberg/pull/72165.
-		if ( NAVIGATION_BLOCK_TYPES.includes( blockName ) ) {
-			return false;
-		}
-		const newData = {};
-		Object.values( bindings ).forEach( ( { args, newValue } ) => {
-			newData[ args.key ] = newValue;
-		} );
-
-		dispatch( coreDataStore ).editEntityRecord(
-			'postType',
-			context?.postType,
-			context?.postId,
-			newData
-		);
+	// eslint-disable-next-line no-unused-vars
+	setValues( { dispatch, context, bindings } ) {
+		// Terms are typically not editable through block bindings in most contexts.
+		return false;
 	},
 	canUserEditValue( { select, context, args } ) {
 		const { getBlockName, getSelectedBlockClientId } =
 			select( blockEditorStore );
+
 		const clientId = getSelectedBlockClientId();
 		const blockName = getBlockName?.( clientId );
 
@@ -148,17 +174,17 @@ export default {
 			return false;
 		}
 
-		// Lock editing in query loop.
-		if ( context?.query || context?.queryId ) {
+		// Terms are typically read-only when displayed.
+		if ( context?.termQuery ) {
 			return false;
 		}
 
-		// Lock editing when `postType` is not defined.
-		if ( ! context?.postType ) {
+		// Lock editing when `taxonomy` or `termId` is not defined.
+		if ( ! context?.taxonomy || ! context?.termId ) {
 			return false;
 		}
 
-		const fieldValue = getPostDataFields( select, context, undefined )?.[
+		const fieldValue = getTermDataFields( select, context, undefined )?.[
 			args.key
 		]?.value;
 		// Empty string or `false` could be a valid value, so we need to check if the field value is undefined.
@@ -166,47 +192,33 @@ export default {
 			return false;
 		}
 
-		// Check that the user has the capability to edit post data.
-		const canUserEdit = select( coreDataStore ).canUser( 'update', {
-			kind: 'postType',
-			name: context?.postType,
-			id: context?.postId,
-		} );
-		if ( ! canUserEdit ) {
-			return false;
-		}
-
-		return true;
+		return false;
 	},
 	getFieldsList( { select, context } ) {
-		const clientId = select( blockEditorStore ).getSelectedBlockClientId();
 		// Deprecated, will be removed after 6.9.
-		return getPostDataFields( select, context, clientId );
+		return getTermDataFields( select, context );
 	},
 	editorUI( { select, context } ) {
 		const selectedBlock = select( blockEditorStore ).getSelectedBlock();
-		if ( selectedBlock?.name !== 'core/post-date' ) {
-			return {};
-		}
 		// Exit early for navigation blocks (read-only)
 		if ( NAVIGATION_BLOCK_TYPES.includes( selectedBlock?.name ) ) {
 			return {};
 		}
-		const postDataFields = Object.entries(
-			getPostDataFields( select, context ) || {}
+		const termDataFields = Object.entries(
+			getTermDataFields( select, context ) || {}
 		).map( ( [ key, field ] ) => ( {
 			label: field.label,
+			type: field.type,
 			args: {
 				key,
 			},
-			type: field.type,
 		} ) );
 		/*
 		 * We need to define the data as [{ label: string, value: any, type: https://developer.wordpress.org/block-editor/reference-guides/block-api/block-attributes/#type-validation }]
 		 */
 		return {
 			mode: 'dropdown',
-			data: postDataFields,
+			data: termDataFields,
 		};
 	},
 };
